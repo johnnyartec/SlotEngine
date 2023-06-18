@@ -111,6 +111,8 @@ namespace SlotEngine.GameModule.Olympus.NormalGame
                 gameResult.GameRounds.Add(gameRound);
             }
 
+
+
             return gameResult;
         }
 

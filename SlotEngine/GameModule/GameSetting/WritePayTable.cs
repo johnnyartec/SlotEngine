@@ -27,7 +27,7 @@ namespace SlotEngine.GameModule.GameSetting
             var symbolNo = "A"; //皇冠
             payTable.Items.Add(symbolNo, new PayTableItem()
             {
-                SymbolNo = symbolNo,
+                Description = symbolNo,
                 SymbolType = "S",
                 PayOut = new List<Decimal> { 0, 0, 0, 0, 0, 
                 0,      0,      20,     20,     50, 
@@ -40,7 +40,7 @@ namespace SlotEngine.GameModule.GameSetting
             symbolNo = "B"; //沙漏
             payTable.Items.Add(symbolNo, new PayTableItem()
             {
-                SymbolNo = symbolNo,
+                Description = symbolNo,
                 SymbolType = "S",
                 PayOut = new List<Decimal> { 0, 0, 0, 0, 0, 
                 0,      0,      5,     5,     20, 
@@ -53,7 +53,7 @@ namespace SlotEngine.GameModule.GameSetting
             symbolNo = "C";     //戒指
             payTable.Items.Add(symbolNo, new PayTableItem()
             {
-                SymbolNo = symbolNo,
+                Description = symbolNo,
                 SymbolType = "S",
                 PayOut = new List<Decimal> { 0, 0, 0, 0, 0, 
                 0,      0,      4,     4,     10, 
@@ -67,7 +67,7 @@ namespace SlotEngine.GameModule.GameSetting
             symbolNo = "D";     //酒盃
             payTable.Items.Add(symbolNo, new PayTableItem()
             {
-                SymbolNo = symbolNo,
+                Description = symbolNo,
                 SymbolType = "S",
                 PayOut = new List<Decimal> { 0, 0, 0, 0, 0, 
                 0,      0,      3,     3,     4, 
@@ -81,7 +81,7 @@ namespace SlotEngine.GameModule.GameSetting
             symbolNo = "E";     //紅寶石
             payTable.Items.Add(symbolNo, new PayTableItem()
             {
-                SymbolNo = symbolNo,
+                Description = symbolNo,
                 SymbolType = "S",
                 PayOut = new List<Decimal> { 0, 0, 0, 0, 0, 
                 0,      0,      2,     2,     3, 
@@ -95,7 +95,7 @@ namespace SlotEngine.GameModule.GameSetting
             symbolNo = "F";     //紫寶石
             payTable.Items.Add(symbolNo, new PayTableItem()
             {
-                SymbolNo = symbolNo,
+                Description = symbolNo,
                 SymbolType = "S",
                 PayOut = new List<Decimal> { 0, 0, 0, 0, 0, 
                 0,      0,      1.6M,     1.6M,     2.4M, 
@@ -109,7 +109,7 @@ namespace SlotEngine.GameModule.GameSetting
             symbolNo = "G";     //黃寶石
             payTable.Items.Add(symbolNo, new PayTableItem()
             {
-                SymbolNo = symbolNo,
+                Description = symbolNo,
                 SymbolType = "S",
                 PayOut = new List<Decimal> { 0, 0, 0, 0, 0, 
                 0,      0,      1,     1,     2, 
@@ -123,7 +123,7 @@ namespace SlotEngine.GameModule.GameSetting
             symbolNo = "H";     //綠寶石
             payTable.Items.Add(symbolNo, new PayTableItem()
             {
-                SymbolNo = symbolNo,
+                Description = symbolNo,
                 SymbolType = "S",
                 PayOut = new List<Decimal> { 0, 0, 0, 0, 0, 
                 0,      0,      0.8M,     0.8M,     1.8M, 
@@ -138,7 +138,7 @@ namespace SlotEngine.GameModule.GameSetting
             symbolNo = "I";     //藍寶石
             payTable.Items.Add(symbolNo, new PayTableItem()
             {
-                SymbolNo = symbolNo,
+                Description = symbolNo,
                 SymbolType = "S",
                 PayOut = new List<Decimal> { 0, 0, 0, 0, 0, 
                 0,      0,      0.5M,     0.5M,     1.5M, 
