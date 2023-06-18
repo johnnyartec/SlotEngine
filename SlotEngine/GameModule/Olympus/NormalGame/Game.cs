@@ -77,12 +77,11 @@ namespace SlotEngine.GameModule.Olympus.NormalGame
         {
             var gameResult = new GameResult
             {
+                Verbose = Verbose,
                 Stake = stake
             };
 
             var gameReel = MakeGameReel(_originalGameReel, _originalGameReel);
-            PrintReelWindow(gameReel);
-
             var isContinue = true;
             var runTimes = 0;
 
@@ -95,60 +94,54 @@ namespace SlotEngine.GameModule.Olympus.NormalGame
                     Verbose = Verbose
                 };
 
-                //產生盤面
-                if (runTimes == 1)
-                {
-                    gameRound.ReelPos = GenerateReelPos();
-                }
-                
+                if (runTimes == 1) gameResult.ReelPos = GenerateReelPos();
 
-                var windowData = GetWindowData(gameReel, gameRound.ReelPos);
-                gameRound.GamePane = windowData;
+                var windowData = GetWindowData(gameReel, gameResult.ReelPos);
+                gameRound.WindowData = windowData;
 
-                //判斷中獎項目
-                var winningItems = CheckWinningItems(windowData);
+                var symbolCountCollection = CountSymbols(windowData);
+                gameRound.WinningItems = CalculateWinningItems(symbolCountCollection, _payTable);
 
-                //計算中獎金額
-                gameRound.HitResult = CalculatePayout(winningItems, _payTable);
-
-                //中獎後
-                var _ = CalTumble(gameRound.HitResult, windowData);
-                TrumbleGameReel(gameReel, gameRound.ReelPos, gameRound.HitResult);
-
-                //記錄這個掉落回合的資訊到gameResult
-                gameResult.GameRounds.Add(gameRound);
+                var _ = CountRemovedSymbolInReels(gameRound.WinningItems, windowData);
+                RemoveSymbolInReels(gameReel, gameResult.ReelPos, gameRound.WinningItems);
 
                 gameReel = MakeGameReel(gameReel, _originalGameReel);
+                isContinue = CheckIsContinue(gameRound);
 
-                //Step 判斷是否繼續
-                if (gameRound.HitResult.Count == 0) isContinue = false;
-
-                if(Verbose) Console.WriteLine("Win?" + isContinue);
-
+                gameResult.GameRounds.Add(gameRound);
             }
 
             return gameResult;
         }
+
+        private bool CheckIsContinue(GameRound gameRound)
+        {
+            bool isContinue = gameRound.WinningItems.Count > 0;
+            if (Verbose) Console.WriteLine("Win?" + isContinue);
+
+            return isContinue;
+        }
+
 
         /// <summary>
         /// 把Reel的Symbol消除
         /// </summary>
         /// <param name="gameReel"></param>
         /// <param name="reelPos"></param>
-        /// <param name="windowPayout"></param>
-        private void TrumbleGameReel(GameReel gameReel, List<int> reelPos, Dictionary<string, decimal> windowPayout)
+        /// <param name="winningItems"></param>
+        private void RemoveSymbolInReels(GameReel gameReel, List<int> reelPos, Dictionary<string, decimal> winningItems)
         {
-            for(var i=0; i<gameReel.ReelSymbols.Count; i++)
+            for(var reelIndex=0; reelIndex<gameReel.ReelSymbols.Count; reelIndex++)
             {
-                var startPos = reelPos[i];
+                var startPos = reelPos[reelIndex];
 
-                for(int j= WinHeight - 1; j>=0; j--)
+                for(int relativePos= WinHeight - 1; relativePos>=0; relativePos--)
                 {
-                    string symbol = gameReel.ReelSymbols[i][startPos + j];
+                    string symbol = gameReel.ReelSymbols[reelIndex][startPos + relativePos];
 
-                    if (windowPayout.ContainsKey(symbol))
+                    if (winningItems.ContainsKey(symbol))
                     {
-                        gameReel.ReelSymbols[i].RemoveAt(startPos + j);
+                        gameReel.ReelSymbols[reelIndex].RemoveAt(startPos + relativePos);
                     }
                 }
             }
@@ -160,7 +153,7 @@ namespace SlotEngine.GameModule.Olympus.NormalGame
         /// <param name="windowPayout"></param>
         /// <param name="reelWindow"></param>
         /// <returns></returns>
-        private List<int> CalTumble(Dictionary<string, decimal> windowPayout, GameReel reelWindow)
+        private List<int> CountRemovedSymbolInReels(Dictionary<string, decimal> windowPayout, GameReel reelWindow)
         {
             List<int> trumbleCount = new();
 
@@ -182,23 +175,23 @@ namespace SlotEngine.GameModule.Olympus.NormalGame
         /// <summary>
         /// 依PayTable, 找出有中的Symbol, 並計算Payout
         /// </summary>
-        /// <param name="symbolCount"></param>
+        /// <param name="symbolCountCollection"></param>
         /// <param name="payTable"></param>
-        /// <returns>中獎的項目與Payout</returns>
-        private Dictionary<string, decimal> CalculatePayout(Dictionary<string, int> symbolCount, PayTable payTable)
+        /// <returns>中獎的Symbol與賠倍</returns>
+        private Dictionary<string, decimal> CalculateWinningItems(Dictionary<string, int> symbolCountCollection, PayTable payTable)
         {
-            Dictionary<string, decimal> payout = new Dictionary<string, decimal>();
+            Dictionary<string, decimal> payoutCollection = new Dictionary<string, decimal>();
 
-            foreach(var symbol in symbolCount.Keys)
+            foreach(var symbol in symbolCountCollection.Keys)
             {
-                var oneSymbolCount = symbolCount[symbol];
-                var onePayout = payTable.Items[symbol].PayOut[oneSymbolCount - 1]; 
-                if(onePayout > 0){
-                    payout.Add(symbol, onePayout);
+                var symbolCount = symbolCountCollection[symbol];
+                var payout = payTable.Items[symbol].PayOut[symbolCount - 1]; 
+                if(payout > 0){
+                    payoutCollection.Add(symbol, payout);
                 }
             }
 
-            return payout;
+            return payoutCollection;
         }
 
         /// <summary>
@@ -206,7 +199,7 @@ namespace SlotEngine.GameModule.Olympus.NormalGame
         /// </summary>
         /// <param name="reelWindow"></param>
         /// <returns></returns>
-        private Dictionary<string, int> CheckWinningItems(GameReel reelWindow)
+        private Dictionary<string, int> CountSymbols(GameReel reelWindow)
         {
             Dictionary<string, int> result = new();
 
@@ -257,22 +250,24 @@ namespace SlotEngine.GameModule.Olympus.NormalGame
         {
             var cloneGameReel = new GameReel();
 
-            for (int i = 0; i < currentGameReel.ReelSymbols.Count; i++)
+            for (int reelIndex = 0; reelIndex < currentGameReel.ReelSymbols.Count; reelIndex++)
             {
-                var list1 = new List<string>(currentGameReel.ReelSymbols[i]);
-                var list2 = new List<string>(originalGameReel.ReelSymbols[i]);
+                var list1 = new List<string>(currentGameReel.ReelSymbols[reelIndex]);
+                var list2 = new List<string>(originalGameReel.ReelSymbols[reelIndex]);
                 //如果目前的輪軸所剩Symbol個數 < 原始輪軸Symbol個數+顯示視窗顯示Symbol個數
                 //就加長該輪軸
-                if (currentGameReel.ReelSymbols[i].Count < originalGameReel.ReelSymbols[i].Count + WinHeight)
+                if (currentGameReel.ReelSymbols[reelIndex].Count < originalGameReel.ReelSymbols[reelIndex].Count + WinHeight)
                 {
                     cloneGameReel.ReelSymbols.Add(list1.Concat(list2).ToList());
-                    if (Verbose) Console.WriteLine($"Extend Reel{i}");
+                    if (Verbose) Console.WriteLine($"Extend Reel{reelIndex}");
                 }
                 else
                 {
                     cloneGameReel.ReelSymbols.Add(list1);
                 }
             }
+
+            PrintReelWindow(cloneGameReel);
 
             return cloneGameReel;
         }

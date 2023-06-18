@@ -7,14 +7,8 @@ namespace SlotEngine.GameModule.Olympus.NormalGame
     /// </summary>
     public class GameRound
     {
+        /*
         private List<int> _reelPos = new();
-
-        private GameReel _gamePane = new();
-        //中獎的Symbol, 中獎個數
-        private Dictionary<string, decimal> _hitResult = new();
-
-        public bool Verbose{get;set;}
-        public decimal Payout{get; private set;}
         public List<int> ReelPos
         {
             get => _reelPos;
@@ -27,26 +21,34 @@ namespace SlotEngine.GameModule.Olympus.NormalGame
                 }
             }
         }
+        */
+        private GameReel _windowData = new();
+        //中獎的Symbol, 中獎個數
+        private Dictionary<string, decimal> _winningItems = new();
 
-        public GameReel GamePane { 
-            get => _gamePane; 
+        public bool Verbose{get;set;}
+        public decimal Payout{get; private set;}
+
+
+        public GameReel WindowData { 
+            get => _windowData; 
             set{
-                _gamePane = value;
+                _windowData = value;
                 if (Verbose)
                 {
-                    PrintReelWindow(_gamePane);
+                    PrintReelWindow(_windowData);
                 }
             }
         }
 
-        public Dictionary<string, decimal> HitResult {
-            get => _hitResult; 
+        public Dictionary<string, decimal> WinningItems {
+            get => _winningItems; 
             set{
-                _hitResult = value;
-                Payout = _hitResult.Values.Sum();
+                _winningItems = value;
+                Payout = _winningItems.Values.Sum();
                 if (Verbose)
                 {
-                    PrintPayout(_hitResult);
+                    PrintPayout(_winningItems);
                 }
             }
         }

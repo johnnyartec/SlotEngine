@@ -11,7 +11,7 @@ namespace ConsoleClient.Command
             IRandomService randomService = new RandomService();
             Game g = new Game(randomService, null, null);
             GameResult gr = g.Spin(1);
-            string result = JsonConvert.SerializeObject(gr);
+            string result = JsonConvert.SerializeObject(gr, Formatting.Indented );
             Console.WriteLine(result);
         }
     }
